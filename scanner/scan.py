@@ -2,12 +2,11 @@ import os
 import sys
 import re
 import json
-from openai import OpenAI
+from groq import Groq
 
 SKILLS_DIR = "skills"
-MODEL = "gpt-4o-mini"
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 SUSPICIOUS_PATTERNS = [
     r"ignore\s+previous\s+instructions",
@@ -27,26 +26,26 @@ def regex_scan(text):
 
 
 def ai_scan(text):
-    system_prompt = """
+    prompt = f"""
 You are a security scanner.
 Classify content as SAFE or MALICIOUS.
-Return JSON:
 
-{
+Return JSON only:
+
+{{
   "classification": "SAFE" or "MALICIOUS",
   "malicious_lines": [
-    {"line_number": int, "content": "string"}
+    {{"line_number": int, "content": "string"}}
   ]
-}
+}}
+
+Text:
+{text}
 """
 
     response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": text}
-        ],
-        temperature=0
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
     )
 
     try:
@@ -87,10 +86,10 @@ def main():
             print()
 
     if malicious_found:
-        print("❌ Failing workflow: malicious content found")
+        print("❌ Failing workflow")
         sys.exit(1)
     else:
-        print("✅ All files are SAFE")
+        print("✅ All SAFE")
         sys.exit(0)
 
 

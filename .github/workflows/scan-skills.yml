@@ -1,8 +1,7 @@
-name: AI Skills Security Scan
+name: AI Security Scanner
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
@@ -10,20 +9,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.12'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      - name: Run Scanner
+      - name: Run scanner
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           python scanner/scan.py
